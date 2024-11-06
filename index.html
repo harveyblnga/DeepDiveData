@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Deep Dive Data</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <style>
+        :root {
+            --primary-color: #e43f5a;
+            --secondary-color: #ff8c7a;
+            --bg-dark: #1a1a2e;
+            --bg-light: #1b1b2f;
+            --bg-contrast: #162447;
+            --bg-lighter: #1e2a4a;
+            --text-color: #e0e0e0;
+            --text-muted: #bfbfbf;
+        }
+        body {
+            background-color: var(--bg-dark);
+            color: var(--text-color);
+            font-family: 'Arial', sans-serif;
+        }
+        .navbar {
+            background-color: var(--bg-light);
+        }
+        .navbar-brand, .nav-link {
+            color: var(--text-muted) !important;
+        }
+        .nav-link:hover {
+            color: var(--primary-color) !important;
+        }
+        .hero-section {
+            background-color: var(--bg-light);
+            padding: 80px 0;
+            text-align: center;
+        }
+        .hero-section h1 {
+            color: var(--primary-color);
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+        }
+        .btn-primary {
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
+        }
+        .btn-primary:hover {
+            background-color: var(--secondary-color);
+            border-color: var(--secondary-color);
+        }
+        .chart-section {
+            background-color: var(--bg-contrast);
+            padding: 60px 0;
+        }
+        .explore-section {
+            background-color: var(--bg-light);
+            padding: 60px 0;
+        }
+        .chart-card {
+            background-color: var(--bg-dark);
+            border: none;
+            border-radius: 10px;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .chart-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+        }
+        .chart-image-container {
+            background-color: var(--bg-lighter);
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .chart-description {
+            color: var(--text-muted);
+            font-size: 1rem;
+            line-height: 1.6;
+        }
+        footer {
+            background-color: var(--bg-light);
+            color: var(--text-muted);
+            padding: 20px 0;
+        }
+        footer a {
+            color: var(--text-color);
+            text-decoration: none;
+        }
+        footer a:hover {
+            color: var(--primary-color);
+        }
+        .section-title {
+            color: var(--primary-color);
+            margin-bottom: 2rem;
+        }
+        .card-container {
+            background-color: var(--bg-lighter);
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        /* Bump Chart Styles */
+        .line {
+            stroke-linecap: round;
+            stroke-linejoin: round;
+            opacity: 0.8;
+        }
+        .dot {
+            stroke-width: 2;
+            cursor: pointer;
+            transition: r 0.3s, fill 0.3s;
+        }
+        .dot:hover {
+            fill: var(--secondary-color);
+        }
+        .tooltip {
+            position: absolute;
+            text-align: center;
+            padding: 8px;
+            font-size: 14px;
+            background: rgba(50, 50, 50, 0.85);
+            color: white;
+            border-radius: 5px;
+            pointer-events: none;
+            opacity: 0;
+            box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.3);
+            transition: opacity 0.3s;
+        }
+        .axis path,
+        .axis line {
+            fill: none;
+            stroke: var(--text-muted);
+            shape-rendering: crispEdges;
+        }
+        #bump-chart svg {
+            width: 100%;
+            height: auto;
+        }
+        #bump-chart {
+            display: flex;
+            justify-content: center;
+            margin: 20px 0;
+        }
+  
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg">
+        <div class="container">
+            <a href="index.html" class="navbar-brand d-flex align-items-center">
+                <img src="img/1.png" alt="Logo" width="40" height="40" class="rounded-circle me-2">
+                Deep Dive Data
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <!--<li class="nav-item"><a class="nav-link" href="#">Insights</a></li>-->
+                    <li class="nav-item"><a class="nav-link" href="blog.html">Explore Data</a></li>
+                    <!--<li class="nav-item"><a class="nav-link" href="#">Insights</a></li>-->
+                    <li class="nav-item"><a class="nav-link" href="#">About</a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+
+    <section class="hero-section">
+        <div class="container">
+            <img src="intro.svg" alt="Deep Dive Data" class="img-fluid mb-4" style="max-width: 800px;">
+            <h1>
+                Data, Beautifully Presented
+            </h1>
+            <p class="lead  mb-4" style="color: #e0e0e0;">Complex Data, Simple Explanations</p>
+            <!--<button class="btn btn-primary btn-lg">Get Started</button>-->
+        </div>
+    </section>
+
+    <section class="chart-section">
+        <div class="container-fluid">
+            <h2 class="text-center section-title">Featured:Shifting Priorities in Lending</h2>
+            <h3 class="text-center mb-4">How Each Bank Allocates Funds Across Categories</h3>
+
+            
+            <div class="d-flex justify-content-center mb-4">
+                <div class="btn-group" role="group" aria-label="Dataset selection">
+                    <input type="radio" class="btn-check" name="dataset" id="dataset1" value="dataset1" checked>
+                    <label class="btn btn-outline-primary" for="dataset1">National View</label>
+
+                    <input type="radio" class="btn-check" name="dataset" id="dataset2" value="dataset2">
+                    <label class="btn btn-outline-primary" for="dataset2">Bank 1 View</label>
+                </div>
+            </div>
+            <div id="bump-chart" class="chart-image-container" style="width: 100%; max-width: 1200px; margin: 0 auto;"></div>
+            <div id="tooltip" class="tooltip"></div>
+
+             <div class="d-flex justify-content-center mb-4">
+                
+            </div>
+         
+            <h2 class="text-center section-title">
+                <p class="chart-description text-center">
+                   Want to delve deeper into the specific loan categories and their impact on each bank's performance?
+                </p>
+            </h2>
+            <h2 class="text-center section-title">
+                <!--<button class="btn btn-primary btn-lg">Learn More</button>-->
+                <a href="articles/Shifting Priorities in Lending.html" class="btn btn-primary btn-lg">Explore Chart</a>
+
+                
+            </h2>
+            
+        </div>
+    </section>
+
+    <section class="explore-section">
+        <div class="container">
+            <h2 class="text-center section-title">Explore More Charts</h2>
+            <div class="card-container">
+                <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+                    <div class="col">
+                        <div class="card chart-card h-100">
+                            <div class="card-body d-flex flex-column">
+                                <h5 class="card-title"style="color: #e0e0e0;">Exploring Zimbabwe's Religious Mosaic</h5>
+                                <div class="post-img">
+                                    <img src="img/Zimbabwe Religious 2.png" alt="" class="img-fluid">
+                                </div>
+                                <p class="card-text flex-grow-1" style="color: #e0e0e0;">A Province-by-Province Exploration of Religious Diversity.</p>
+                                <!--<button class="btn btn-primary mt-3" onclick="openChart('dataset1')">Explore Chart</button>-->
+                                <a href="articles/Zimbabwe-Religious-Mosaic.html" class="btn btn-primary mt-3">Explore Chart</a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col">
+                        <div class="card chart-card h-100">
+                            <div class="card-body d-flex flex-column">
+                                <h5 class="card-title" style="color: #e0e0e0;">Inter-Provincial Lifetime Migration  </h5>
+                                
+                                  <div class="post-img">
+                                    <img src="img/Inter provincial migration total.png" alt="" class="img-fluid">
+                                </div>  
+                                <p class="card-text flex-grow-1" style="color: #e0e0e0;">Provincial Population Dynamics: A Visual Exploration</p> 
+                                <a href="articles/Migration-Patterns-Zimbabwe.html" class="btn btn-primary mt-3">Explore Chart</a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col">
+                        <div class="card chart-card h-100">
+                            <div class="card-body d-flex flex-column">
+                                <h5 class="card-title" style="color: #e0e0e0;">Interactive $130 Budget Planner</h5>
+                                <div class="post-img">
+                                    <img src="img/Budget Planner.png" alt="" class="img-fluid">
+                                </div>
+
+                                <p class="card-text flex-grow-1" style="color: #e0e0e0;">
+                                    Budgeting on a shoestring: A tool for Zimbabweans perspective.
+                                </p>
+                                <a href="articles/$130 Budget Planner.html" class="btn btn-primary mt-3">Explore Chart</a>
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+       <footer class="text-center mt-5">
+        <div class="container">
+            <p>&copy; 2024 Deep Dive Data </p>
+            <!--<p>&copy; 2024 Deep Dive Data | <a href="#">Privacy Policy</a> | <a href="#">Terms of Service</a></p>-->
+            <div class="mt-3">
+                <a href="https://x.com/DeepDiveDataZW" class="me-3"><i class="fab fa-twitter"></i></a>
+                <a href="https://www.linkedin.com/company/deepdivedatazw/" class="me-3"><i class="fab fa-linkedin"></i></a>
+                <!--<a href="#"><i class="fab fa-github"></i></a>-->
+            </div>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        const dataset1 = [
+            { year: 2019, Agriculture: 31.69, Construction: 1.37, Communication: 0.26, Distribution: 10.84, Financial_Investiments: 0.47, Financial_Organizations: 14.62, Manufacturing: 9.99, Mining: 7.99, Services: 8.00, Transport: 0.82, Individuals: 13.88, Conglomerates: 0.07 },
+            { year: 2020, Agriculture: 26.94, Construction: 0.79, Communication: 0.38, Distribution: 14.19, Financial_Investiments: 0.04, Financial_Organizations: 13.35, Manufacturing: 11.60, Mining: 10.73, Services: 6.71, Transport: 2.20, Individuals: 13.01, Conglomerates: 0.07 },
+            { year: 2021, Agriculture: 29.14, Construction: 0.96, Communication: 0.30, Distribution: 13.19, Financial_Investiments: 0.31, Financial_Organizations: 5.91, Manufacturing: 11.88, Mining: 5.68, Services: 7.79, Transport: 1.62, Individuals: 23.22, Conglomerates: 0.02 },
+            { year: 2022, Agriculture: 24.47, Construction: 1.38, Communication: 0.61, Distribution: 13.50, Financial_Investiments: 0.16, Financial_Organizations: 5.41, Manufacturing: 12.38, Mining: 11.28, Services: 10.76, Transport: 1.42, Individuals: 18.60, Conglomerates: 0.03 }
+        ];
+
+        const dataset2 = [
+            { year: 2020, Individuals: 42, Agriculture: 20, Manufacturing: 17, Distribution: 12, Services: 9, Mining: 1 },
+            { year: 2021, Individuals: 46, Agriculture: 18, Manufacturing: 14, Distribution: 7, Services: 15, Mining: 0 },
+            { year: 2022, Individuals: 65, Agriculture: 8, Manufacturing: 9, Distribution: 8, Services: 9, Mining: 1 },
+            { year: 2023, Individuals: 22, Agriculture: 22, Manufacturing: 21, Distribution: 5, Services: 30, Mining: 0 },
+            { year: 2024, Individuals: 13, Agriculture: 9, Manufacturing: 65, Distribution: 3, Services: 7, Mining: 3 }
+        ];
+
+        let currentData = dataset1;
+
+        const margin = { top: 40, right: 40, bottom: 50, left: 125 },
+            width = 900 - margin.left - margin.right,
+            height = 500 - margin.top - margin.bottom;
+
+        const svg = d3.select("#bump-chart")
+            .append("svg")
+            .attr("viewBox", `0 0 ${width + margin.left + margin.right} ${height + margin.top + margin.bottom}`)
+            .append("g")
+            .attr("transform", `translate(${margin.left},${margin.top})`);
+
+        function updateChartSize() {
+            const chartContainer = document.getElementById('bump-chart');
+            const containerWidth = chartContainer.clientWidth;
+            const containerHeight = containerWidth * (height + margin.top + margin.bottom) / (width + margin.left + margin.right);
+
+            d3.select("#bump-chart svg")
+                .attr("width", containerWidth)
+                .attr("height", containerHeight);
+
+            renderChart(currentData);
+        }
+
+        window.addEventListener('resize', updateChartSize);
+        updateChartSize(); // Initial call to set the size
+
+
+        function renderChart(data) {
+            svg.selectAll("*").remove();
+
+            const chartContainer = document.getElementById('bump-chart');
+            const containerWidth = chartContainer.clientWidth;
+            const containerHeight = containerWidth * (height + margin.top + margin.bottom) / (width + margin.left + margin.right);
+
+            const chartWidth = width;
+            const chartHeight = height;
+
+            const rankData = data.map(yearData => {
+                const sectors = Object.keys(yearData).filter(key => key !== "year");
+                sectors.sort((a, b) => yearData[b] - yearData[a]);
+                return { year: yearData.year, ranks: sectors };
+            });
+
+            const x = d3.scalePoint()
+                .domain(data.map(d => d.year))
+                .range([0, chartWidth]);
+
+            const y = d3.scaleLinear()
+                .domain([1, rankData[0].ranks.length])
+                .range([0, chartHeight]);
+
+            const color = {
+
+                "Agriculture": "#42bddf",
+                "Construction": "#261214",
+                "Communication": "#1B76FF",
+                "Distribution": "#4a4948",
+                "Financial_Investiments": "#FFBE00",
+                "Financial_Organizations": "#25064C",
+                "Manufacturing": "#ca1056",
+                "Mining": "#2a455b",
+                "Services": "#2e6368",
+                "Transport": "#c0b156",
+                "Individuals": "#f4b49b",
+                "Conglomerates": "#cfb4bd"
+            };
+
+            const tooltip = d3.select("#tooltip");
+            const sectors = Object.keys(data[0]).filter(d => d !== "year");
+
+            const radiusScale = d3.scaleLinear()
+                .domain([0, 100])
+                .range([13.5, 40]);
+
+            sectors.forEach(sector => {
+                const line = d3.line()
+                    .x(d => x(d.year))
+                    .y(d => y(rankData.find(r => r.year === d.year).ranks.indexOf(sector) + 1));
+
+                svg.append("path")
+                    .datum(data)
+                    .attr("class", `line line-${sector}`)
+                    .attr("d", line)
+                    .attr("stroke", color[sector])
+                    .attr("stroke-width", 7)
+                    .attr("fill", "none");
+
+                svg.selectAll(`.dot-${sector}`)
+                    .data(data)
+                    .enter().append("circle")
+                    .attr("class", "dot")
+                    .attr("cx", d => x(d.year))
+                    .attr("cy", d => y(rankData.find(r => r.year === d.year).ranks.indexOf(sector) + 1))
+                    .attr("r", d => radiusScale(d[sector]))
+                    .attr("fill", color[sector])
+                    .attr("stroke", color[sector])
+                    .attr("stroke-width", 2)
+                    .on("mouseover", (event, d) => {
+                        const rank = rankData.find(r => r.year === d.year).ranks.indexOf(sector) + 1;
+                        svg.selectAll(".line").style("opacity", 0.1);
+                        svg.select(`.line-${sector}`).style("opacity", 1);
+                        tooltip.transition().duration(200).style("opacity", 1);
+                        tooltip.html(`
+                            <strong>${sector}</strong><br>
+                            Year: ${d.year}<br>
+                            Rank: ${rank}<br>
+                            Value: ${d[sector]}
+                        `)
+                            .style("left", (event.pageX + 10) + "px")
+                            .style("top", (event.pageY - 28) + "px")
+                            .style("background-color", color[sector]);
+                    })
+                    .on("mouseout", () => {
+                        tooltip.transition().duration(500).style("opacity", 0);
+                        svg.selectAll(".line").style("opacity", 1);
+                    });
+
+                svg.selectAll(`.label-${sector}`)
+                    .data(data)
+                    .enter().append("text")
+                    .attr("class", "label")
+                    .attr("x", d => x(d.year))
+                    .attr("y", d => y(rankData.find(r => r.year === d.year).ranks.indexOf(sector) + 1))
+                    .attr("dy", ".35em")
+                    .attr("text-anchor", "middle")
+                    .attr("fill", "#fff")
+                    .style("font-size", "12px")
+                    .text(d => `${d[sector]}%`);
+            });
+
+            svg.append("g")
+                .attr("transform", `translate(0,${chartHeight})`)
+                .call(d3.axisBottom(x).tickFormat(d3.format("d")))
+                .selectAll("text")
+                .style("font-size", "15px");
+
+            svg.append("text")
+                .attr("class", "x-axis-label")
+                .attr("x", chartWidth / 2)
+                .attr("y", chartHeight + margin.bottom - 10)
+                .style("text-anchor", "middle")
+                .style("font-size", "14px")
+                .text("Year");
+
+            svg.append("g")
+                .attr("transform", `translate(-10, 0)`)
+                .call(d3.axisLeft(y).ticks(rankData[0].ranks.length).tickFormat(d => d))
+                .selectAll("text")
+                .style("font-size", "11px");
+
+            svg.append("text")
+                .attr("class", "y-axis-label")
+                .attr("x", -chartHeight / 2)
+                .attr("y", -margin.left + 50)
+                .attr("transform", "rotate(-90)")
+                .style("text-anchor", "middle")
+                .style("font-size", "11px")
+                .text("Rank");
+
+            const initialYear = rankData[0];
+            svg.selectAll(".rank-label")
+                .data(initialYear.ranks)
+                .enter().append("text")
+                .attr("class", "rank-label")
+                .attr("x", -70)
+                .attr("y", (d, i) => y(i + 1))
+                .attr("dy", ".35em")
+                .attr("text-anchor", "end")
+                .style("font-size", "11px")
+                .style("fill", d => color[d])
+                .each(function(d) {
+                    const textElement = d3.select(this);
+                    const lines = d.split("_");
+                    textElement.text("");
+                    lines.forEach((line, i) => {
+                        textElement.append("tspan")
+                            .attr("x", -50)
+                            .attr("dy", i === 0 ? 0 : "1.2em")
+                            .text(line);
+                    });
+                });
+        }
+
+        document.querySelectorAll("input[name='dataset']").forEach(radio => {
+            radio.addEventListener("change", (event) => {
+                currentData = event.target.value === "dataset1" ? dataset1 : dataset2;
+                renderChart(currentData);
+            });
+        });
+
+        renderChart(currentData);
+
+        function openChart(dataset) {
+            alert('Opening chart for ' + dataset);
+        }
+    </script>
+</body>
+</html>

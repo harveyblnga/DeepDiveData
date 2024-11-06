@@ -1,0 +1,97 @@
+<style>
+    /* Color Variables */
+    :root {
+        --primary-bg: #1a1a2e;         /* Dark Navy Blue (Base Background) */
+        --secondary-bg: #1f4068;       /* Lighter Blue for Sections */
+        --highlight-bg: #1b1b2f;       /* Darker Blue for Cards */
+        --accent-red: #e43f5a;         /* Coral Red for Headings and Buttons */
+        --light-blue: #5DA3FA;         /* Light Blue from logo */
+        --neutral-gray: #e0e0e0;       /* Neutral Gray for text */
+        --footer-bg: #13163A;          /* Darker shade for footer */
+        --tooltip-bg: rgba(50, 50, 50, 0.85); /* Tooltip Background */
+    }
+
+    /* Global Styles */
+    body {
+        background-color: var(--primary-bg);
+        color: var(--neutral-gray);
+        font-family: 'Arial', sans-serif;
+    }
+
+    /* Hero Section */
+    .hero-section {
+        background-color: #162447;
+        padding: 50px 0;
+        text-align: center;
+    }
+
+    .hero-section h1 {
+        color: var(--accent-red);
+    }
+
+    /* Chart Section */
+    .chart-section {
+        padding: 20px;
+        background-color: var(--secondary-bg);
+        border-radius: 8px;
+    }
+
+    .chart-container {
+        min-height: 400px;
+    }
+
+    /* Chart Card */
+    .chart-card {
+        background-color: var(--highlight-bg);
+        color: var(--neutral-gray);
+        border: none;
+        border-radius: 8px;
+    }
+
+    /* Tooltip */
+    .tooltip {
+        position: absolute;
+        padding: 10px;
+        background: var(--tooltip-bg);
+        color: white;
+        border-radius: 5px;
+        pointer-events: none;
+        opacity: 0;
+        transition: opacity 0.3s;
+    }
+
+    /* Bump Chart Container */
+    #bump-chart {
+        display: flex;
+        justify-content: center;
+        margin: 40px 0;
+    }
+
+    /* Buttons */
+    button, .btn {
+        background-color: var(--accent-red);
+        color: white;
+        border-radius: 4px;
+    }
+
+    button:hover, .btn:hover {
+        background-color: #ff5a73; /* Slightly lighter coral */
+    }
+
+    /* Footer */
+    footer {
+        background-color: var(--footer-bg);
+        color: var(--neutral-gray);
+        padding: 20px;
+        text-align: center;
+    }
+
+    /* Chart Colors (for D3 or SVG styles) */
+    .chart-line {
+        stroke: var(--light-blue);
+    }
+
+    .chart-label {
+        fill: var(--neutral-gray);
+    }
+</style>
